@@ -1,0 +1,537 @@
+
+CREATE OR REPLACE PROCEDURE SP_CARGAR_MACHINE_INV IS
+BEGIN
+
+  MERGE INTO MACHINE_MASTER_INV tgt
+  USING (
+    SELECT
+      e.NOMBRE_VM,
+
+      ------------------------------------------------------------------
+      -- SISTEMA_OPERATIVO_INV (por SISTEMA_OPERATIVO)
+      ------------------------------------------------------------------
+      CASE TRIM(e.SISTEMA_OPERATIVO)
+        WHEN 'Microsoft Windows Server 2016 or later (64-bit)' THEN 1
+        WHEN 'Other 6.x or later Linux (64-bit)'               THEN 2
+        WHEN 'Oracle Linux 9 (64-bit)'                          THEN 3
+        WHEN 'unknown'                                          THEN 4
+        WHEN 'Microsoft Windows Server 2022 (64-bit)'           THEN 5
+        WHEN 'Oracle Linux 8 (64-bit)'                          THEN 6
+        WHEN 'VMware Photon OS (64-bit)'                        THEN 7
+        WHEN 'Ubuntu Linux (64-bit)'                            THEN 8
+        WHEN 'Microsoft Windows Server 2019 (64-bit)'           THEN 9
+        WHEN 'Red Hat Enterprise Linux 8 (64-bit)'              THEN 10
+        WHEN 'Red Hat Enterprise Linux 7 (64-bit)'              THEN 11
+        WHEN 'Microsoft Windows Server 2016 (64-bit)'           THEN 12
+        WHEN 'Oracle Linux 7 (64-bit)'                          THEN 13
+        WHEN 'Microsoft Windows Server 2012 (64-bit)'           THEN 14
+        WHEN 'Oracle Linux 4/5/6/7 (64-bit)'                    THEN 15
+        WHEN 'Oracle Linux 4/5 (64-bit)'                        THEN 16
+        WHEN 'Red Hat Enterprise Linux 9 (64-bit)'              THEN 17
+        WHEN 'Microsoft Windows Server 2025 (64-bit)'           THEN 18
+        WHEN 'Other 3.x or later Linux (64-bit)'                THEN 19
+        WHEN 'Red Hat Enterprise Linux 6 (64-bit)'              THEN 20
+        WHEN 'SUSE Linux Enterprise 12 (64-bit)'                THEN 21
+        WHEN 'Other 4.x Linux (64-bit)'                         THEN 22
+        WHEN 'CentOS 8 (64-bit)'                                THEN 23
+        WHEN 'Microsoft Windows Server 2008 R2 (64-bit)'        THEN 24
+        WHEN 'Other 4.x or later Linux (64-bit)'                THEN 25
+        WHEN 'Microsoft Windows 10 (32-bit)'                    THEN 26
+        WHEN 'Other Linux (64-bit)'                             THEN 27
+        WHEN 'Oracle Solaris 10 (64-bit)'                       THEN 28
+        WHEN 'Other 2.6.x Linux (64-bit)'                       THEN 29
+        WHEN 'Other 5.x Linux (64-bit)'                         THEN 30
+        WHEN 'CentOS 4/5 (64-bit)'                              THEN 31
+        WHEN 'FortiManager-VM64 v7.2.7-build1633 240821 (GA)'   THEN 32
+        WHEN 'Debian GNU/Linux 13 (64-bit)'                     THEN 33
+        WHEN 'Microsoft Windows Server 2008 (32-bit)'           THEN 34
+        WHEN 'Debian GNU/Linux 11 (64-bit)'                     THEN 35
+        WHEN 'Other (32-bit)'                                   THEN 36
+        WHEN 'Debian GNU/Linux 10 (64-bit)'                     THEN 37
+        WHEN 'Red Hat Enterprise Linux 5 (64-bit)'              THEN 38
+        WHEN 'SUSE Linux Enterprise 11 (64-bit)'                THEN 39
+        WHEN 'FreeBSD 11 (64-bit)'                              THEN 40
+        WHEN 'Other 3.x Linux (64-bit)'                         THEN 41
+        WHEN 'Microsoft Windows Server 2008 (64-bit)'           THEN 42
+        WHEN 'Oracle Linux 4/5/6 (64-bit)'                      THEN 43
+        WHEN 'Microsoft Windows Server 2008'                    THEN 44
+        WHEN 'Oracle Linux 8'                                   THEN 45
+        WHEN 'Oracle Linux 7'                                   THEN 46
+        WHEN 'WINDOWS'                                          THEN 47
+        WHEN 'CentOS 7 (64-bit)'                                THEN 48
+        WHEN 'Debian GNU/Linux 8 (64-bit)'                      THEN 49
+        WHEN 'Windows Server 2019'                              THEN 50
+        WHEN 'Windows Server 2022'                              THEN 51
+        WHEN 'ESX'                                               THEN 52
+        WHEN 'SUSE Linux Enterprise 15 (64-bit)'                                               THEN 53
+        ELSE NULL
+      END AS ID_SISTEMA_OPERATIVO,
+
+      ------------------------------------------------------------------
+      -- AMBIENTE_INV (por AMBIENTE)
+      ------------------------------------------------------------------
+      CASE UPPER(TRIM(e.AMBIENTE))
+        WHEN 'PRD'                  THEN 1
+        WHEN 'DEV'                  THEN 2
+        WHEN 'N/A'                  THEN 3
+        WHEN 'QA'                   THEN 4
+        WHEN 'ADMINISTRACION'       THEN 5
+        WHEN 'JUMPBOX'              THEN 6
+        WHEN 'CLON'                 THEN 7
+        WHEN 'CEPROBAN'             THEN 8
+        WHEN 'DRP'                  THEN 9
+        WHEN 'SEGURIDAD'            THEN 10
+        WHEN 'TELECOMUNICACIONES'   THEN 11
+        WHEN 'CONTINGENCIA'         THEN 12
+        WHEN 'MONITOREO'            THEN 13
+        WHEN 'DEVQA'                THEN 14
+        WHEN 'DMZ'                  THEN 15
+        ELSE NULL
+      END AS ID_AMBIENTE_INV,
+
+      e.TIPO_ACTIVO,
+
+      ------------------------------------------------------------------
+      -- UBICACION_INV (por UBICACION)
+      ------------------------------------------------------------------
+      CASE UPPER(TRIM(e.UBICACION))
+        WHEN 'N/A'            THEN 1
+        WHEN 'TEGUCIGALPA'    THEN 2
+        WHEN 'HONDURAS'       THEN 3
+        WHEN 'SAN PEDRO SULA' THEN 4
+        WHEN 'MIAMI'          THEN 5
+        WHEN 'BOGOT '         THEN 6
+        ELSE NULL
+      END AS ID_UBICACION,
+
+      ------------------------------------------------------------------
+      -- SERVICIOS_INV (por SERVICIOS)
+      ------------------------------------------------------------------
+      CASE UPPER(TRIM(e.SERVICIOS))
+        WHEN 'DYNAMICS' THEN 1
+        WHEN 'OTROS' THEN 2
+        WHEN 'ZABBIX' THEN 3
+        WHEN 'API' THEN 4
+        WHEN 'LATINIA' THEN 5
+        WHEN 'MASIVOS' THEN 6
+        WHEN 'REMESAS' THEN 7
+        WHEN 'ACH' THEN 8
+        WHEN 'JUMPER' THEN 9
+        WHEN 'TECNOLOGIA' THEN 10
+        WHEN 'FICOHSAPENSIONES' THEN 11
+        WHEN 'LABORATORIOINTEL' THEN 12
+        WHEN 'MOODYS' THEN 13
+        WHEN 'APLICACIONWEB' THEN 14
+        WHEN 'COBIS' THEN 15
+        WHEN 'SAFEWATCH' THEN 16
+        WHEN 'FLINKT24' THEN 17
+        WHEN 'BASEDEDATOS' THEN 18
+        WHEN 'CLIENTIX' THEN 19
+        WHEN 'READYAPI' THEN 20
+        WHEN 'PROXY' THEN 21
+        WHEN 'RPA' THEN 22
+        WHEN 'JASPER' THEN 23
+        WHEN 'CAMBIODECONTRASE ASABANKS' THEN 24
+        WHEN 'PAYTRUE' THEN 25
+        WHEN 'ONBASE' THEN 26
+        WHEN 'FILESERVER' THEN 27
+        WHEN 'CORTEX' THEN 28
+        WHEN 'BI' THEN 29
+        WHEN 'CREDITFORCE' THEN 30
+        WHEN 'DYNAMO' THEN 31
+        WHEN 'AML' THEN 32
+        WHEN 'SACE' THEN 33
+        WHEN 'FOREX' THEN 34
+        WHEN 'ANALYTICS' THEN 35
+        WHEN 'MIGRACION' THEN 36
+        WHEN 'OMNICANAL' THEN 37
+        WHEN 'GIA' THEN 38
+        WHEN 'FENIX' THEN 39
+        WHEN 'BLAZEFORCE' THEN 40
+        WHEN 'DELFOS' THEN 41
+        WHEN 'QMATIC' THEN 42
+        WHEN 'APL' THEN 43
+        WHEN 'PINES' THEN 44
+        WHEN 'ENTRUST' THEN 45
+        WHEN 'COBROS' THEN 46
+        WHEN 'KIOSKO' THEN 47
+        WHEN 'ZIMBRA' THEN 48
+        WHEN 'FIRMAS' THEN 49
+        WHEN 'IPS' THEN 50
+        WHEN 'DOMINIO' THEN 51
+        WHEN 'PAYEXPEDITE' THEN 52
+        WHEN 'FICOWEB' THEN 53
+        WHEN 'AUDITORIA' THEN 54
+        WHEN 'GIROSOL' THEN 55
+        WHEN 'CREDITSCORE' THEN 56
+        WHEN 'DIGITALAUTOMATIONINTELLIGENCE' THEN 57
+        WHEN 'SNMP' THEN 58
+        WHEN 'TARJETAS' THEN 59
+        WHEN 'ALERTAS' THEN 60
+        WHEN 'MIDDLEWARE' THEN 61
+        WHEN 'SERVICEDESK' THEN 62
+        WHEN 'SFTP' THEN 63
+        WHEN 'ETH' THEN 64
+        WHEN 'BASE DE DATOS' THEN 65
+        WHEN 'ATM' THEN 66
+        WHEN 'DEVSCAN' THEN 67
+        WHEN 'AFILIACIONESMASIVAS' THEN 68
+        WHEN 'NOTIFICACIONES' THEN 69
+        WHEN 'ADQUIRENCIA' THEN 70
+        WHEN 'SMARTFILE' THEN 71
+        WHEN 'FACTORA' THEN 72
+        WHEN 'WAVE' THEN 73
+        WHEN 'ATD' THEN 74
+        WHEN 'BLAZE' THEN 75
+        WHEN 'VEEAM' THEN 76
+        WHEN 'OPCON' THEN 77
+        WHEN 'WEBAPP' THEN 78
+        WHEN 'BASDEDATOS' THEN 79
+        WHEN 'EGGPLANTFUNCTIONAL' THEN 80
+        WHEN 'FICOTICKET' THEN 81
+        WHEN 'APLICATIVOFRAUDES' THEN 82
+        WHEN 'DESARROLLOMOVIL' THEN 83
+        WHEN 'T24' THEN 84
+        WHEN 'SERVIDORDEPRUEBAS' THEN 85
+        WHEN 'BALCAM' THEN 86
+        WHEN 'BANCADEEMPRESAS' THEN 87
+        WHEN 'APPSSERVICES' THEN 88
+        WHEN 'APLICATIVOQA' THEN 89
+        WHEN 'SEGURIDADLOGICA' THEN 90
+        WHEN 'APPTC-IISYSERVICIOSWINDOWS' THEN 91
+        WHEN 'PROMETHEOS' THEN 92
+        WHEN 'ISE' THEN 93
+        WHEN 'IMPERIUM' THEN 94
+        WHEN 'VMWARE' THEN 95
+        WHEN 'SWIFT' THEN 96
+        WHEN 'XTRATION' THEN 97
+        WHEN 'AHIBA' THEN 98
+        WHEN 'QUANTUM' THEN 99
+        WHEN 'GOANYWHERE' THEN 100
+        WHEN 'KEYMANAGER' THEN 101
+        WHEN 'SAP' THEN 102
+        WHEN 'HELIUM' THEN 103
+        WHEN 'TENABLE' THEN 104
+        WHEN 'MONITOREO' THEN 105
+        WHEN 'TELEFONIA' THEN 106
+        WHEN 'DBA' THEN 107
+        WHEN 'MEDIOSDEPAGO' THEN 108
+        WHEN 'FICONET' THEN 109
+        WHEN 'HISTORICOVASA' THEN 110
+        WHEN 'INTEL' THEN 111
+        WHEN 'ROEC' THEN 112
+        WHEN 'CAJAMULTIPLE' THEN 113
+        WHEN 'ETHICALHACKING' THEN 114
+        WHEN 'WEBSERVICE' THEN 115
+        WHEN 'DHCP' THEN 116
+        WHEN 'IMAGENEST24' THEN 117
+        WHEN 'TELECOM' THEN 118
+        WHEN 'FTP' THEN 119
+        WHEN 'ACLAUDITORIA' THEN 120
+        WHEN 'DESKTOPCENTRAL' THEN 121
+        WHEN 'ASPECT' THEN 122
+        WHEN 'ONELOGIN' THEN 123
+        WHEN 'DWH' THEN 124
+        WHEN 'AWS' THEN 125
+        WHEN 'CYBERARK' THEN 126
+        WHEN 'ADAUDIT' THEN 127
+        WHEN 'CREDIFORCE' THEN 128
+        WHEN 'OMS' THEN 129
+        WHEN 'OPERACIONES' THEN 130
+        WHEN 'SALESFORCE' THEN 131
+        WHEN 'MESIOSDEPAGO' THEN 132
+        WHEN 'REPOSITORIOSLOCALES' THEN 133
+        WHEN 'RRHH' THEN 134
+        WHEN 'HSM' THEN 135
+        WHEN 'SIEM' THEN 136
+        WHEN 'MOBYS' THEN 137
+        WHEN 'PORTALPARAMETROSPANAMA' THEN 138
+        WHEN 'BANRED' THEN 139
+        WHEN 'GRAFANA' THEN 140
+        WHEN 'HOPEX' THEN 141
+        WHEN 'APPSERVICE' THEN 142
+        WHEN 'VCENTER' THEN 143
+        WHEN 'ADFICOHSASEGUROS' THEN 144
+        WHEN 'IVANTI' THEN 145
+        WHEN 'FIRMASSFTP' THEN 146
+        WHEN 'AUDITPLUS' THEN 147
+        WHEN 'PASSWORDMANAGER' THEN 148
+        WHEN 'SOLARWINDS' THEN 149
+        WHEN '2IAX' THEN 150
+        WHEN 'SENTINEL' THEN 151
+        WHEN 'CISCOISE' THEN 152
+        WHEN 'FICOHSASEGUROS' THEN 153
+        WHEN 'FIDEICOMISOS' THEN 154
+        WHEN 'TRELLIX' THEN 155
+        WHEN 'MONIAC' THEN 156
+        WHEN 'LUMU' THEN 157
+        WHEN 'APLICATIVOSOPORTEALAPRODUCCI N' THEN 158
+        WHEN 'PORTALCAMBIODECLAVEABANKS-MESADESERVICIO' THEN 159
+        WHEN 'SEFIN' THEN 160
+        WHEN 'SEMPERIS' THEN 161
+        WHEN 'NTP' THEN 162
+        WHEN 'HISTORICO' THEN 163
+        WHEN 'SOPORTETECNICO' THEN 164
+        WHEN 'APLICATIVOSEGURIDADFISICA' THEN 165
+        WHEN 'SOAHUB' THEN 166
+        WHEN 'ADSELFSERVICE' THEN 167
+        WHEN 'LOGARITH' THEN 168
+        WHEN 'SOPORTEGL' THEN 169
+        WHEN 'STRUXURE' THEN 170
+        WHEN 'CONTROLADORDEDOMINIO' THEN 171
+        WHEN 'CUMPLIMIENTO' THEN 172
+        WHEN 'CONTROLDECAMBIO' THEN 173
+        WHEN 'CAROOT' THEN 174
+        WHEN 'FIREWALLANALYZER' THEN 175
+        WHEN 'CCURE9000' THEN 176
+        WHEN 'MOEBIUS' THEN 177
+        WHEN 'INTRANET' THEN 178
+        WHEN 'COLECTOR' THEN 179
+        WHEN 'SUMITEC' THEN 180
+        WHEN 'CITRIX' THEN 181
+        WHEN 'FORTYANALYZER' THEN 182
+        WHEN 'CAMATM' THEN 183
+        WHEN 'JOURNALATM' THEN 184
+        WHEN 'CHAGEMG' THEN 185
+        WHEN 'INFLOBLOX' THEN 186
+        WHEN 'AUTOMATIZACIONES' THEN 187
+        WHEN 'SERVIDORDEALARMAS' THEN 188
+        WHEN 'LOGISTICA' THEN 189
+        WHEN 'FORTYMANAGER' THEN 190
+        WHEN 'PLANTILLA' THEN 191
+        WHEN 'GITLAB' THEN 192
+        WHEN 'JIRA' THEN 193
+        WHEN 'BACKUP' THEN 194
+        WHEN 'TEFELONIA' THEN 195
+        WHEN 'MONITOREOREDATM' THEN 196
+        WHEN 'TABLEAU' THEN 197
+        WHEN 'OPTIMIZER' THEN 198
+        WHEN 'FRAUDE' THEN 199
+        WHEN 'VU' THEN 200
+        WHEN 'STRONGVIEW' THEN 201
+        WHEN 'FIM' THEN 202
+        WHEN 'ODI' THEN 203
+        WHEN 'KUBERNETES' THEN 204
+        WHEN 'DYNATRACE' THEN 205
+        WHEN 'DECLARACI NJURADA' THEN 206
+        WHEN 'AZURE' THEN 207
+        WHEN 'SMTP' THEN 208
+        WHEN 'WORKFLOW' THEN 209
+        ELSE NULL
+      END AS ID_SERVICIOS,
+
+      e.TIPO,
+      e.VISUALIZADOR,
+      e.ESTADO,
+
+      ------------------------------------------------------------------
+      -- CLUSTER_INV (por CLUSTER_VM)
+      ------------------------------------------------------------------
+      CASE UPPER(TRIM(e.CLUSTER_VM))
+        WHEN 'CLUSTER_QA_DEV_LENOVO' THEN 1
+        WHEN 'CLUSTER_QA_DEV_HUAWEI' THEN 2
+        WHEN 'CLUSTER_HCI_TGU'       THEN 3
+        WHEN 'CLUSTER_RESTORE'       THEN 4
+        WHEN 'ASPECT_DRP'            THEN 5
+        WHEN 'CLUSTER_SPS'           THEN 6
+        WHEN 'CLUSTER_LIBERTY'       THEN 7
+        ELSE NULL
+      END AS ID_CLUSTER_VM,
+
+      e.MEMORIA,
+      e.CPU,
+      e.ULTIMA_ACTUALIZACION,
+      e.ESX,
+      e.SITE_PRIMARIO_SECUNDARIO,
+      e.FECHA_CREACION,
+      e.HORA_CREACION,
+      e.N_IPS_V4,
+      e.N_IPS_V6,
+      e.IPV6,
+      e.LISTADO_IPSV4_V6,
+      e.TAGS,
+      e.OBSERVACIONES,
+      e.IPV4,
+      e.DNS,
+      e.DISCOS,
+      e.ESPACIO,
+      e.TENABLE,
+      e.REPOSITORIO_TENABLE,
+      e.ANTIVIRUS,
+      e.DESGLOCE_ANTIVIRUS,
+      e.TRELLIX,
+      e.TREND,
+      e.CORTEX,
+      e.ESTADO_ANTIVIRUS,
+      e.LUMU,
+      e.SENTINEL,
+      e.CYBERARK,
+      e.CYBERARK_LISTADO,
+      e.CYBERARK_USUARIOS,
+      e.ENDPOINT_CENTRAL,
+      e.AD,
+      e.VEEAM_BACKUP,
+      e.VEEAM_REPLICA,
+      e.BACKUP_ACTIVO,
+      e.REPLICA_ACTIVA,
+      e.JOB_BK,
+      e.JOB_REPLICA,
+      e.SIEM,
+      e.HARDENING,
+      e.PUPPET,
+      e.EXCEPCIONES,
+      e.EXCEPCION_TENABLE,
+      e.EXCEPCION_SENTINEL,
+      e.EXCEPCION_AD,
+      e.EXCEPCION_VEEAM,
+      e.EXCEPCION_CYBERARK,
+      e.EXCEPCION_ANTIVIRUS,
+      e.EXCEPCION_DC,
+      e.EXCEPCION_LUMU,
+      e.EXCEPCION_SIEM,
+      e.EXCEPCION_PUPPET,
+      e.EXCEPCION_HARDENING,
+      e.pathfinder,
+      e.fim
+      
+    FROM EXT_INVENTARIO_VMS e
+  ) src
+  ON (tgt.NOMBRE_VM = src.NOMBRE_VM)
+  WHEN MATCHED THEN UPDATE SET
+    tgt.ID_SISTEMA_OPERATIVO      = src.ID_SISTEMA_OPERATIVO,
+    tgt.ID_AMBIENTE_inv           = src.ID_AMBIENTE_INV,
+    tgt.TIPO_ACTIVO               = src.TIPO_ACTIVO,
+    tgt.ID_UBICACION              = src.ID_UBICACION,
+    tgt.ID_SERVICIOS              = src.ID_SERVICIOS,
+    tgt.TIPO                      = src.TIPO,
+    tgt.Visualizador              = src.VISUALIZADOR,
+    tgt.ESTADO                    = src.ESTADO,
+    tgt.ID_CLUSTER_VM             = src.ID_CLUSTER_VM,
+    tgt.MEMORIA                   = src.MEMORIA,
+    tgt.CPU                       = src.CPU,
+    tgt.ULTIMA_ACTUALIZACION      = src.ULTIMA_ACTUALIZACION,
+    tgt.ESX                       = src.ESX,
+    tgt.SITE_PRIMARIO_SECUNDARIO  = src.SITE_PRIMARIO_SECUNDARIO,
+    tgt.FECHA_CREACION            = src.FECHA_CREACION,
+    tgt.HORA_CREACION             = src.HORA_CREACION,
+    tgt.N_IPS_V4                  = src.N_IPS_V4,
+    tgt.N_IPS_V6                  = src.N_IPS_V6,
+    tgt.IPV6                      = src.IPV6,
+    tgt.LISTADO_IPSV4_V6          = src.LISTADO_IPSV4_V6,
+    tgt.TAGS                      = src.TAGS,
+    tgt.OBSERVACIONES             = src.OBSERVACIONES,
+    tgt.IPV4                      = src.IPV4,
+    tgt.DNS                       = src.DNS,
+    tgt.DISCOS                    = src.DISCOS,
+    tgt.ESPACIO                   = src.ESPACIO,
+    tgt.TENABLE                   = src.TENABLE,
+    tgt.REPOSITORIO_TENABLE       = src.REPOSITORIO_TENABLE,
+    tgt.ANTIVIRUS                 = src.ANTIVIRUS,
+    tgt.DESGLOCE_ANTIVIRUS        = src.DESGLOCE_ANTIVIRUS,
+    tgt.TRELLIX                   = src.TRELLIX,
+    tgt.TREND                     = src.TREND,
+    tgt.CORTEX                    = src.CORTEX,
+    tgt.ESTADO_ANTIVIRUS          = src.ESTADO_ANTIVIRUS,
+    tgt.LUMU                      = src.LUMU,
+    tgt.SENTINEL                  = src.SENTINEL,
+    tgt.CYBERARK                  = src.CYBERARK,
+    tgt.CYBERARK_LISTADO          = src.CYBERARK_LISTADO,
+    tgt.CYBERARK_USUARIOS         = src.CYBERARK_USUARIOS,
+    tgt.ENDPOINT_CENTRAL          = src.ENDPOINT_CENTRAL,
+    tgt.AD                        = src.AD,
+    tgt.VEEAM_BACKUP              = src.VEEAM_BACKUP,
+    tgt.VEEAM_REPLICA             = src.VEEAM_REPLICA,
+    tgt.BACKUP_ACTIVO             = src.BACKUP_ACTIVO,
+    tgt.REPLICA_ACTIVA            = src.REPLICA_ACTIVA,
+    tgt.JOB_BK                    = src.JOB_BK,
+    tgt.JOB_REPLICA               = src.JOB_REPLICA,
+    tgt.SIEM                      = src.SIEM,
+    tgt.HARDENING                 = src.HARDENING,
+    tgt.PUPPET                    = src.PUPPET,
+    tgt.EXCEPCIONES               = src.EXCEPCIONES,
+    tgt.EXCEPCION_TENABLE         = src.EXCEPCION_TENABLE,
+    tgt.EXCEPCION_SENTINEL        = src.EXCEPCION_SENTINEL,
+    tgt.EXCEPCION_AD              = src.EXCEPCION_AD,
+    tgt.EXCEPCION_VEEAM           = src.EXCEPCION_VEEAM,
+    tgt.EXCEPCION_CYBERARK        = src.EXCEPCION_CYBERARK,
+    tgt.EXCEPCION_ANTIVIRUS       = src.EXCEPCION_ANTIVIRUS,
+    tgt.EXCEPCION_DC              = src.EXCEPCION_DC,
+    tgt.EXCEPCION_LUMU            = src.EXCEPCION_LUMU,
+    tgt.EXCEPCION_SIEM            = src.EXCEPCION_SIEM,
+    tgt.EXCEPCION_PUPPET          = src.EXCEPCION_PUPPET,
+    tgt.EXCEPCION_HARDENING       = src.EXCEPCION_HARDENING,
+    tgt.pathfinder       = src.pathfinder,
+    tgt.fim       = src.fim,
+    tgt.ESTADO_PROCESAMIENTO      =
+      CASE WHEN src.ID_SISTEMA_OPERATIVO IS NULL
+             OR src.ID_AMBIENTE_INV IS NULL
+             OR src.ID_UBICACION IS NULL
+             OR src.ID_SERVICIOS IS NULL
+             OR src.ID_CLUSTER_VM IS NULL
+           THEN 'ERROR' ELSE 'OK' END,
+    tgt.ERROR                     =
+      TRIM(
+        CASE WHEN src.ID_SISTEMA_OPERATIVO IS NULL THEN 'No se encontro SISTEMA_OPERATIVO en catalogo. ' END ||
+        CASE WHEN src.ID_AMBIENTE_INV IS NULL THEN 'No se encontro AMBIENTE en catalogo. ' END ||
+        CASE WHEN src.ID_UBICACION IS NULL THEN 'No se encontro UBICACION en catalogo. ' END ||
+        CASE WHEN src.ID_SERVICIOS IS NULL THEN 'No se encontro SERVICIOS en catalogo. ' END ||
+        CASE WHEN src.ID_CLUSTER_VM IS NULL THEN 'No se encontro CLUSTER_VM en catalogo. ' END
+      )
+  WHEN NOT MATCHED THEN INSERT (
+    NOMBRE_VM, ID_SISTEMA_OPERATIVO, ID_AMBIENTE_inv, TIPO_ACTIVO, ID_UBICACION,
+    ID_SERVICIOS, TIPO, Visualizador, ESTADO, ID_CLUSTER_VM,
+    MEMORIA, CPU, ULTIMA_ACTUALIZACION, ESX,
+    SITE_PRIMARIO_SECUNDARIO, FECHA_CREACION, HORA_CREACION, N_IPS_V4, N_IPS_V6,
+    IPV6, LISTADO_IPSV4_V6, TAGS, OBSERVACIONES,
+    IPV4, DNS, DISCOS, ESPACIO,
+    TENABLE, REPOSITORIO_TENABLE, ANTIVIRUS, DESGLOCE_ANTIVIRUS,
+    TRELLIX, TREND, CORTEX, ESTADO_ANTIVIRUS, LUMU, SENTINEL,
+    CYBERARK, CYBERARK_LISTADO, CYBERARK_USUARIOS,
+    ENDPOINT_CENTRAL, AD, VEEAM_BACKUP, VEEAM_REPLICA,
+    BACKUP_ACTIVO, REPLICA_ACTIVA, JOB_BK, JOB_REPLICA,
+    SIEM, HARDENING, PUPPET, EXCEPCIONES,
+    EXCEPCION_TENABLE, EXCEPCION_SENTINEL, EXCEPCION_AD,
+    EXCEPCION_VEEAM, EXCEPCION_CYBERARK, EXCEPCION_ANTIVIRUS,
+    EXCEPCION_DC, EXCEPCION_LUMU, EXCEPCION_SIEM,
+    EXCEPCION_PUPPET, EXCEPCION_HARDENING, pathfinder, fim,
+    ESTADO_PROCESAMIENTO, ERROR
+  ) VALUES (
+    src.NOMBRE_VM, src.ID_SISTEMA_OPERATIVO, src.ID_AMBIENTE_INV, src.TIPO_ACTIVO, src.ID_UBICACION,
+    src.ID_SERVICIOS, src.TIPO, src.VISUALIZADOR, src.ESTADO, src.ID_CLUSTER_VM,
+    src.MEMORIA, src.CPU, src.ULTIMA_ACTUALIZACION, src.ESX,
+    src.SITE_PRIMARIO_SECUNDARIO, src.FECHA_CREACION, src.HORA_CREACION, src.N_IPS_V4, src.N_IPS_V6,
+    src.IPV6, src.LISTADO_IPSV4_V6, src.TAGS, src.OBSERVACIONES,
+    src.IPV4, src.DNS, src.DISCOS, src.ESPACIO,
+    src.TENABLE, src.REPOSITORIO_TENABLE, src.ANTIVIRUS, src.DESGLOCE_ANTIVIRUS,
+    src.TRELLIX, src.TREND, src.CORTEX, src.ESTADO_ANTIVIRUS, src.LUMU, src.SENTINEL,
+    src.CYBERARK, src.CYBERARK_LISTADO, src.CYBERARK_USUARIOS,
+    src.ENDPOINT_CENTRAL, src.AD, src.VEEAM_BACKUP, src.VEEAM_REPLICA,
+    src.BACKUP_ACTIVO, src.REPLICA_ACTIVA, src.JOB_BK, src.JOB_REPLICA,
+    src.SIEM, src.HARDENING, src.PUPPET, src.EXCEPCIONES,
+    src.EXCEPCION_TENABLE, src.EXCEPCION_SENTINEL, src.EXCEPCION_AD,
+    src.EXCEPCION_VEEAM, src.EXCEPCION_CYBERARK, src.EXCEPCION_ANTIVIRUS,
+    src.EXCEPCION_DC, src.EXCEPCION_LUMU, src.EXCEPCION_SIEM, src.pathfinder, src.fim,
+    src.EXCEPCION_PUPPET, src.EXCEPCION_HARDENING,
+    CASE WHEN src.ID_SISTEMA_OPERATIVO IS NULL
+           OR src.ID_AMBIENTE_INV IS NULL
+           OR src.ID_UBICACION IS NULL
+           OR src.ID_SERVICIOS IS NULL
+           OR src.ID_CLUSTER_VM IS NULL
+         THEN 'ERROR' ELSE 'OK' END,
+    TRIM(
+      CASE WHEN src.ID_SISTEMA_OPERATIVO IS NULL THEN 'No se encontro SISTEMA_OPERATIVO en catalogo. ' END ||
+      CASE WHEN src.ID_AMBIENTE_INV IS NULL THEN 'No se encontro AMBIENTE en catalogo. ' END ||
+      CASE WHEN src.ID_UBICACION IS NULL THEN 'No se encontro UBICACION en catalogo. ' END ||
+      CASE WHEN src.ID_SERVICIOS IS NULL THEN 'No se encontro SERVICIOS en catalogo. ' END ||
+      CASE WHEN src.ID_CLUSTER_VM IS NULL THEN 'No se encontro CLUSTER_VM en catalogo. ' END
+    )
+  );
+
+  COMMIT;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    ROLLBACK;
+    RAISE;
+END SP_CARGAR_MACHINE_INV;
+/
